@@ -18,24 +18,11 @@ reference database in the sample. For more detailed explanation of the method, r
 
 ## Working with YACHT
 
-### Installation and environment
-
-For this workshop, YACHT is already installed in the `ISMBtutorial` conda environment (see the [README](README.md)):
+Activate the workshop environment and navigate to the yacht working directory:
 
 ```bash
 conda activate ISMBtutorial
-cd ~/ISMBtutorial/yacht
-```
-
-For future reference, to install YACHT in a fresh environment:
-```bash
-conda create -n yacht_env -c conda-forge -c bioconda yacht=1.3.2
-conda activate yacht_env
-```
-
-To download demo data for exploring YACHT on a small dataset:
-```bash
-yacht download demo --outfolder ./demo
+cd ISMBtutorial/yacht
 ```
 
 ### Running YACHT

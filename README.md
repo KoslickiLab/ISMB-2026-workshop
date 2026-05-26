@@ -28,17 +28,24 @@ conda activate ISMBtutorial
 
 ### 2. Download tutorial data
 
-Create a top-level working directory and download all required files before starting:
+Create a directory where you would like this work to take place and navigate into it. For example:
 
 ```bash
-mkdir -p ~/ISMBtutorial/sourmash/{data,output,scripts}
-mkdir -p ~/ISMBtutorial/yacht
+mkdir ISMBtutorial && cd ISMBtutorial
+```
+
+Then create the required subdirectories:
+
+```bash
+mkdir -p sourmash/{data,output,scripts} yacht
 ```
 
 #### Sourmash tutorial data
 
+From inside `ISMBtutorial/`:
+
 ```bash
-cd ~/ISMBtutorial/sourmash/data
+cd sourmash/data
 
 # Sample genomes for comparison exercises
 wget https://raw.githubusercontent.com/Penn-State-Microbiome-Center/KickStart-Workshop-2024/main/Day3-Shotgun/Data/sample_001.fna
@@ -56,33 +63,39 @@ curl -L https://osf.io/q472x/download -o ecoli_ref-5m.fastq.gz
 mkdir ecoli_many_sigs && cd ecoli_many_sigs
 curl -O -L https://github.com/sourmash-bio/sourmash/raw/latest/data/eschericia-sigs.tar.gz
 tar xzf eschericia-sigs.tar.gz && rm eschericia-sigs.tar.gz
-cd ~/ISMBtutorial/sourmash
+cd ../..
 ```
 
 #### YACHT tutorial data
 
+From inside `ISMBtutorial/`:
+
 ```bash
-cd ~/ISMBtutorial/yacht
+cd yacht
 
 # Query metagenome
 wget https://github.com/KoslickiLab/YACHT/raw/refs/heads/main/demo/query_data/query_data.fq
 
 # Sketch the sample
 yacht sketch sample --infile query_data.fq --kmer 31 --scaled 1000 --outfile query_data.sig.zip
+
+# Demo dataset for the YACHT tutorial walkthrough
+yacht download demo --outfolder ./demo
+cd ..
 ```
 
 ---
 
 ### 3. Download the GTDB reference database
 
-From `~/ISMBtutorial/yacht/`, choose one option.
+From `ISMBtutorial/yacht/`, choose one option.
 
 #### Option A: Download pre-sketched reference and train YACHT yourself
 
 This is somewhat computationally intensive (just takes some time to iterate over all ~85K genomes; adjust threads as your system allows):
 
 ```bash
-cd ~/ISMBtutorial/yacht
+cd yacht
 
 # Download the pre-sketched GTDB representative genomes (k=31)
 yacht download default_ref_db --database gtdb --db_version rs214 --gtdb_type reps --k 31 --outfolder ./
@@ -99,7 +112,7 @@ yacht run --json gtdb_ani_thresh_0.95_config.json --sample_file query_data.sig.z
 This is computationally lightweight, but Zenodo is painfully slow, so will likely take the same time as Option A, just with less resources:
 
 ```bash
-cd ~/ISMBtutorial/yacht
+cd yacht
 
 # Download and unpack the pre-trained database
 yacht download pretrained_ref_db --database gtdb --db_version rs214 --k 31 --ani_thresh 0.95 --outfolder ./

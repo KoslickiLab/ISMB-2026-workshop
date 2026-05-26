@@ -7,14 +7,10 @@ Activate the workshop environment and navigate to the sourmash working directory
 
 ```bash
 conda activate ISMBtutorial
-cd ~/ISMBtutorial/sourmash
+cd ISMBtutorial/sourmash
 ```
 
-Data downloads are covered in the [README](README.md). All commands below assume you are in `~/ISMBtutorial/sourmash/`.
-
----
-
-> **Convention:** code blocks marked `bash` are commands to run. Blocks marked `text` show expected output.
+Data downloads are covered in the [README](README.md). All commands below assume you are in `ISMBtutorial/sourmash/`.
 
 ---
 
@@ -72,7 +68,7 @@ This produces a signature file: **sample_001.fna.sig**. Inspect it:
 sourmash sig describe output/sample_001.fna.sig
 ```
 
-```text
+```
 == This is sourmash version 4.8.6. ==
 == Please cite Brown and Irber (2016), doi:10.21105/joss.00027. ==
 
@@ -104,7 +100,7 @@ Estimate the containment between the two signatures with `sourmash compare`:
 sourmash compare output/sample_001.fna.sig output/sample_002.fna.sig --containment
 ```
 
-```text
+```
 == This is sourmash version 4.8.6. ==
 == Please cite Brown and Irber (2016), doi:10.21105/joss.00027. ==
 
@@ -133,7 +129,7 @@ sourmash compare output/sample_001.fna.sig output/sample_002.fna.sig --containme
 
 The expected CSV output:
 
-```text
+```
 sample_001.fna,sample_002.fna
 1.0,0.6956521739836137
 0.7619047624764425,1.0
@@ -154,7 +150,7 @@ sourmash search output/sample_001.fna.sig output/sample_002.fna.sig --containmen
 |sample_002.fna.sig       | signature filename 2. |
 |--containment           | Flag to indicate we are using the similarity index containment. Other similarity indexes that can be used are `--jaccard` |
 
-```text
+```
 == This is sourmash version 4.8.6. ==
 == Please cite Brown and Irber (2016), doi:10.21105/joss.00027. ==
 
@@ -187,33 +183,42 @@ sourmash compare output/sample_001_multi.sig.zip output/sample_002_multi.sig.zip
 sourmash compare output/sample_001_multi.sig.zip output/sample_002_multi.sig.zip --containment -k 51
 ```
 
-The containment of sample_001 in sample_002 across k sizes:
+The containment of sample_001 in sample_002 drops substantially with k:
 
-```text
+```
 k=21:  79.5%
 k=31:  73.2%
 k=51:  51.2%
 ```
 
-Despite containment dropping by ~28 percentage points from k=21 to k=51, applying ANI ≈ containment^(1/k) recovers a consistent estimate of ~98.9% at all three k sizes. This stability makes ANI a more reliable summary of genomic similarity than raw containment.
+Now apply `--estimate-ani` to recover ANI at each k size:
 
-To get ANI directly from sourmash rather than computing it manually, add `--estimate-ani` to `sourmash compare`, or `--estimate-ani-ci` to `sourmash search` (which also reports a confidence interval in the CSV output). For example, using the E. coli genome and strain signatures built in the next section:
+```bash
+sourmash compare output/sample_001_multi.sig.zip output/sample_002_multi.sig.zip --estimate-ani -k 21
+sourmash compare output/sample_001_multi.sig.zip output/sample_002_multi.sig.zip --estimate-ani -k 31
+sourmash compare output/sample_001_multi.sig.zip output/sample_002_multi.sig.zip --estimate-ani -k 51
+```
+
+The estimated ANI between the two samples across k sizes:
+
+```
+k=21:  98.9%
+k=31:  99.0%
+k=51:  98.7%
+```
+
+Despite containment dropping by ~28 percentage points from k=21 to k=51, ANI remains consistent at ~98.9% across all three k sizes. This stability makes ANI a more reliable summary of genomic similarity than raw containment.
+
+To also obtain confidence intervals on the ANI estimate, use `sourmash search` with `--estimate-ani-ci`, which reports ANI bounds in the CSV output. For example, using the E. coli genome and strain signatures built in the next section:
 
 ```bash
 sourmash search output/ecoli-genome.sig data/ecoli_many_sigs/ecoli-1.sig \
     --containment --estimate-ani-ci -k 31 -o output/ani_results.csv
 ```
 
-```text
-1 matches above threshold 0.080:
-similarity   match
-----------   -----
- 77.4%       NZ_JHDG01000001.1 Escherichia coli 1-176-05_S3_C1 e117605...
-```
-
 The CSV output includes ANI and 95% confidence bounds:
 
-```text
+```
 similarity,md5,filename,name,...,ani,ani_low,ani_high
 0.7741,...,NZ_JHDG01000001.1 ...,0.9918,0.9910,0.9925
 ```
@@ -245,15 +250,15 @@ Evaluate *containment*, that is, what fraction of the read content is contained 
 sourmash search output/ecoli-reads.sig output/ecoli-genome.sig --containment
 ```
 
-```text
+```
 select query k=31 automatically.
-loaded query: /home/jovyan/data/ecoli_ref-5m... (k=31, DNA)
+loaded query: ecoli_ref-5m... (k=31, DNA)
 loaded 1 signatures.
 
 1 matches:
 similarity   match
 ----------   -----
- 31.0%       /home/jovyan/data/ecoliMG1655.fa.gz
+ 31.0%       ecoliMG1655.fa.gz
 ```
 
 Try the reverse:
@@ -282,10 +287,10 @@ Search the database:
 sourmash search output/ecoli-genome.sig output/ecolidb.sbt.zip
 ```
 
-```text
+```
 select query k=31 automatically.
-loaded query: /home/ubuntu/data/ecoliMG1655.... (k=31, DNA)
-loaded 0 signatures and 1 databases total.                                     
+loaded query: ecoliMG1655.fa.gz (k=31, DNA)
+loaded 0 signatures and 1 databases total.
 
 49 matches; showing first 20:
 similarity   match
