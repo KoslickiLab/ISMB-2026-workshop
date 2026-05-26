@@ -1,43 +1,17 @@
 
-**Sourmash 3.0 Tutorial**
+# Sourmash Tutorial
 
+## Setup
 
-# Installation
+Activate the workshop environment and navigate to the sourmash working directory:
 
-## Activation on OpenDemand
-If you are taking part in the workshop, use the following commands to activate the environment.
-```
-module load anaconda/2023.09
-conda activate /storage/group/one/default/workshop/2025/envs/microbiome
-```
-
-## Full installation
-This instructions are _only_ if you would like to install it with conda elsewhere (eg. on the open queue, a personal computer, etc.)
-The basic steps are: load conda, create the environment, then install the tool:
 ```bash
-module load anaconda3
-conda create -y --name sourmash install bioconda::sourmash
-conda activate sourmash
+conda activate ISMBtutorial
+cd ~/ISMBtutorial/sourmash
 ```
 
-## Set up directories and obtain the test data:
-- Make analysis folders:
-```
-cd ~
-mkdir sourmash_analysis  #<<-- main analysis folder
-cd sourmash_analysis  #<<-- go inside this folder
-mkdir data output scripts  #<<-- make three directories: data, output, and scripts
-```
-Then download the data
+Data downloads are covered in the [README](README.md). All commands below assume you are in `~/ISMBtutorial/sourmash/`.
 
-```
-cd data
-wget -i https://raw.githubusercontent.com/Penn-State-Microbiome-Center/KickStart-Workshop-2022/main/Day5-Shotgun/Data/file_list.txt  #<<-- downloads the data from github
-ls *.gz | xargs -P6 -I{} gunzip {}  #<<-- decompresses the data in parallel
-wget https://raw.githubusercontent.com/Penn-State-Microbiome-Center/KickStart-Workshop-2024/main/Day3-Shotgun/Data/sample_001.fna
-wget https://raw.githubusercontent.com/Penn-State-Microbiome-Center/KickStart-Workshop-2024/main/Day3-Shotgun/Data/sample_002.fna
-cd ..  #<<-- move back up a directory
-```
 # The MetaGenomQuest Tutorial
 (Courtesy of Judith Rodriguez: https://github.com/bioinfwithjudith/sourmash_tutorial)
 
@@ -71,7 +45,7 @@ One of the beneficial tasks of sourmash is to estimate similarity between sketch
 
 # Preprocessing data utilizing sourmash sketch
 
-To start our sourmash tutorial, we will sketch our fasta file of interest: **sample_001.fna**. This file does not contain any meaningfull information but is just a play dataset for tutorial purposes. 
+To start, sketch `sample_001.fna`, a synthetic dataset used for tutorial purposes.
 
 ```
 sourmash sketch dna data/sample_001.fna -p k=31,scaled=500 --output-dir output
@@ -83,12 +57,12 @@ sourmash sketch dna data/sample_001.fna -p k=31,scaled=500 --output-dir output
 |dna            | Identify that the sequences in our X file are DNA. If a different sequence type is used, like protein sequences, then this would be indicated as **protein** instead.|
 |sample_001.fna       | Filename of interest. Please note that sourmash can produce sketches from either FASTA or FASTQ fules.|
 |-p           | Flag to indicate a list of parameters. |
-|k=33           | Tunable parameter required by the user to set. Check how the ksize can affect further analyses here: (CITE). |
+|k=31           | Tunable parameter required by the user to set. Larger k-mers are more specific; smaller k-mers are more sensitive. |
 |scaled=500     | Our scale factor, which is also tunable.|
 
 Utilizing sourmash sketch, we have produced the following  file, known as a signature file: **sample_001.fna.sig**. 
 
-Let's be a bit nosey and see what this file contains:
+Inspect the signature:
 
 ```
 sourmash sig describe output/sample_001.fna.sig
@@ -116,13 +90,13 @@ summary of sketches:
 
 ## Compare similarity of two sketches with sourmash compare
 
-Now that we feel a bit more comfortable with a sketching fasta file. Let's sketch a another file to compare it to the previous signature file we produced. Notice, that we are using the same ksize and scale factor, sourmash requires that two signatures have parameters tuned in the same way for comparison. 
+Sketch a second file for comparison. Note that sourmash requires matching k-mer size and scale factor for signature comparisons.
 
 ```
 sourmash sketch dna data/sample_002.fna -p k=31,scaled=500 --output-dir output/
 ```
 
-Let's estimate the containment index of our signature files utilizing `sourmash compare`!
+Estimate the containment between the two signatures with `sourmash compare`:
 
 ```
 sourmash compare output/sample_001.fna.sig output/sample_002.fna.sig --containment
@@ -165,51 +139,9 @@ sample_001.fna,sample_002.fna
 0.7619047624764425,1.0
 ```
 
-## Compare individual sequences between signatures.
-
-As you may have noticed, the comparisons reported are between two fasta files as a whole. However, you might be interested in comparing the sequences individually than the sequences as a whole. To accomplish this, we revisit `sourmash sketch`. 
-
-Let's modify our `sourmaash sketch` command by adding the `--singleton` flag, this will produce a signature file where each sequence is sketched individually.
-
-```
-sourmash sketch dna data/sample_001.fna --singleton -p k=31,scaled=500 -o output/sample_001.fna.singleton.sig
-sourmash sketch dna data/sample_002.fna --singleton -p k=31,scaled=500 -o output/sample_002.fna.singleton.sig
-```
-
-Compare the description between the first signature file we produced in which the `--singleton` flag was not utilized (**sample_001.fna.sig**) ato our new siganture file that does utilize the `--singleton` flag, **sample_001.fna.singleton.sig**.
-
-```
-sourmash sig fileinfo output/sample_001.fna.singleton.sig
-```
-
-Instead of having just one sketch representing the fasta file as a whole, the `--singleton` flag produces a signature file with 10 sketches representing the 10 sequences within our fasta file of interest. 
-
-```
-
-== This is sourmash version 4.8.6. ==
-== Please cite Brown and Irber (2016), doi:10.21105/joss.00027. ==
-
-** loading from 'test.sig'
-path filetype: MultiIndex
-location: sample_001.fna.singleton.sig
-is database? no
-has manifest? yes
-num signatures: 10
-** examining manifest...
-total hashes: 210
-summary of sketches:
-   10 sketches with DNA, k=31, scaled=500             210 total hashes
-```
-
-We can run the same command for coomparing two signature files, and the csv file produced will contain the matrix for individual sequences.
-
-```
-sourmash compare output/sample_001.fna.singleton.sig output/sample_002.fna.singleton.sig --containment --csv output/compare.singleton.sig.csv
-```
-
 ## Search and report overall similarity percentages using sourmash search
 
-Maybe you would like to report the percent of how much there is of one sample in another sample.
+To report what fraction of one sample is contained in another:
 
 ```
 sourmash search output/sample_001.fna.sig output/sample_002.fna.sig --containment
@@ -244,16 +176,7 @@ similarity   match
 # Other example uses
 (courtesy of the DIB lab: https://sourmash.readthedocs.io/en/latest/tutorial-basic.html)
 
-Download some reads and a reference genome:
-
-```
-cd data
-curl -L https://osf.io/ruanf/download -o ecoliMG1655.fa.gz
-curl -L https://osf.io/q472x/download -o ecoli_ref-5m.fastq.gz
-cd ..
-```
-
-Compute a scaled signature from our reads:
+These files were downloaded in the setup step (see [README](README.md)). Compute a scaled signature from the reads:
 
 ```
 sourmash sketch dna -p scaled=10000,k=31 data/ecoli_ref*.fastq.gz -o output/ecoli-reads.sig
@@ -299,39 +222,19 @@ sourmash search output/ecoli-genome.sig output/ecoli-reads.sig --containment
 
 ## Make and search a database quickly.
 
-Suppose that we have a collection of signatures (made with `sourmash
-compute` as above) and we want to search it with our newly assembled
-genome (or the reads, even!). How would we do that?
-
-Let's grab a sample collection of 50 E. coli genomes and unpack it --
-
-```
-cd data
-mkdir ecoli_many_sigs
-cd ecoli_many_sigs
-
-curl -O -L https://github.com/sourmash-bio/sourmash/raw/latest/data/eschericia-sigs.tar.gz
-
-tar xzf eschericia-sigs.tar.gz
-rm eschericia-sigs.tar.gz
-
-cd ../..
-
-```
-
-This will produce 50 files named `ecoli-N.sig` in the directory `ecoli_many_sigs/` --
+With the 50 E. coli signatures downloaded during setup (see [README](README.md)):
 
 ```
 ls data/ecoli_many_sigs
 ```
 
-Let's turn this into an easily-searchable database with `sourmash index` --
+Build a searchable database with `sourmash index`:
 
 ```
 sourmash index output/ecolidb data/ecoli_many_sigs/*.sig
 ```
 
-and now we can search!
+Search the database:
 
 ```
 sourmash search output/ecoli-genome.sig output/ecolidb.sbt.zip
@@ -372,8 +275,6 @@ similarity   match
 
 ## Compare many signatures and build a tree.
 
-Compare all the things:
-
 ```
 sourmash compare data/ecoli_many_sigs/* -o output/ecoli_cmp
 ```
@@ -409,4 +310,4 @@ Koslicki, D., & Zabeti, H. (2019). Improving minhash via the containment index w
 <a id="3">[3]</a> 
 Hera, M. R., Pierce-Ward, N. T., & Koslicki, D. (2023). Deriving confidence intervals for mutation rates across a wide range of evolutionary distances using FracMinHash. Genome research, 33(7), 1061-1068.
 
-# Please proceed to the [YACHT Section](TaxonomicProfiling-YACHT.md)
+# Please proceed to the [YACHT tutorial](YACHT.md)

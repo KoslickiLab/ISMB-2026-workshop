@@ -5,9 +5,9 @@ The [README](https://github.com/KoslickiLab/YACHT/blob/main/README.md) documenta
 
 ## YACHT: a brief description
 YACHT stands for **Y**es/No **A**nswers to **C**ommunity membership via **H**ypothesis **T**esting. It is a mathematically rigorous hypothesis test that determines the presence or absence of each genome from a reference database in a given metagenomic sample under user-defined threshold values. Specifically, the user is required to provide the following values in addition to a reference database and an unprocessed metagenomic sequencing sample: 
-1. a false negative rate $a$ which controls the sensitivity of the method. 
-1. 2. A value $A$ that indicates the threshold of Average Nucleotide Identity (ANI) above which two organisms will be considered biologically identical. 
-2. 3. the coverage $c$ needed for a given microbe's genome to be considered present in the sample. 
+1. a false negative rate $a$ which controls the sensitivity of the method.
+2. a value $A$ that indicates the threshold of Average Nucleotide Identity (ANI) above which two organisms will be considered biologically identical.
+3. the coverage $c$ needed for a given microbe's genome to be considered present in the sample.
  
 YACHT then outputs a file indicating the presence and absence of each of the organisms among those in the 
 reference database in the sample. For more detailed explanation of the method, refer to the associated [publication](https://doi.org/10.1093/bioinformatics/btae047).
@@ -18,20 +18,25 @@ reference database in the sample. For more detailed explanation of the method, r
 
 ## Working with YACHT
 
-### Installation and database download
+### Installation and environment
 
-You shouldn't need to do this during the workfhop, but for future reference, to install YACHT, you would use the 
-following commands
+For this workshop, YACHT is already installed in the `ISMBtutorial` conda environment (see the [README](README.md)):
+
 ```bash
-conda create -n yacht_env -c conda-forge -c bioconda yacht
+conda activate ISMBtutorial
+cd ~/ISMBtutorial/yacht
+```
+
+For future reference, to install YACHT in a fresh environment:
+```bash
+conda create -n yacht_env -c conda-forge -c bioconda yacht=1.3.2
 conda activate yacht_env
 ```
 
-To download some demo data, you can use the following command
+To download demo data for exploring YACHT on a small dataset:
 ```bash
 yacht download demo --outfolder ./demo
 ```
-which will put some demo data in your current directory.
 
 ### Running YACHT
 There are three different steps to running YACHT:
@@ -84,12 +89,7 @@ The `--min_coverage_list` parameter is a list of coverage values needed for a gi
 considered in the sample. For example, if you have a coverage value of 0.6, then you're saying that you need 60% of 
 the genome to in the metagenome for it to be considered present.
 
-To view the output Excel document, use:
-```
-module load libreoffice
-libreoffice
-```
-and then open the `result.xlsx` file.
+The output `result.xlsx` can be opened in any spreadsheet application (LibreOffice Calc, Excel, etc.).
 
 We've noticed that a minimum coverage of 0.05 is a balance between sensitivity and specificity. If you make the 
 minimum coverage higher, you need to see more of the genome to say it's present, which is more specific but less 
@@ -137,4 +137,4 @@ Bacteria
 
 
 
-# Please proceed to the [Assembly](Assembly.md) section
+For running YACHT against the GTDB reference database on the workshop query sample, see the setup instructions in the [README](README.md).
