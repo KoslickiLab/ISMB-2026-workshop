@@ -79,7 +79,7 @@ From `~/ISMBtutorial/yacht/`, choose one option.
 
 #### Option A: Download pre-sketched reference and train YACHT yourself
 
-This is computationally intensive (training step uses many threads and significant memory):
+This is somewhat computationally intensive (just takes some time to iterate over all ~85K genomes; adjust threads as your system allows):
 
 ```bash
 cd ~/ISMBtutorial/yacht
@@ -88,7 +88,7 @@ cd ~/ISMBtutorial/yacht
 yacht download default_ref_db --database gtdb --db_version rs214 --gtdb_type reps --k 31 --outfolder ./
 
 # Train YACHT (adjust --num_threads to match your system)
-yacht train --ref_file gtdb-rs214-reps.k31.zip --ksize 31 --num_threads 64 --ani_thresh 0.95 --prefix 'gtdb_ani_thresh_0.95' --outdir ./
+yacht train --ref_file gtdb-rs214-reps.k31.zip --ksize 31 --num_threads 4 --ani_thresh 0.95 --prefix 'gtdb_ani_thresh_0.95' --outdir ./
 
 # Run YACHT
 yacht run --json gtdb_ani_thresh_0.95_config.json --sample_file query_data.sig.zip --num_threads 4 --min_coverage_list 0.01 --out test.xlsx
@@ -96,7 +96,7 @@ yacht run --json gtdb_ani_thresh_0.95_config.json --sample_file query_data.sig.z
 
 #### Option B: Download a pre-trained database
 
-This is faster since the training step is already done:
+This is computationally lightweight, but Zenodo is painfully slow, so will likely take the same time as Option A, just with less resources:
 
 ```bash
 cd ~/ISMBtutorial/yacht
