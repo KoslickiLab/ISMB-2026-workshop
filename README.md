@@ -2,8 +2,10 @@
 
 This tutorial covers [sourmash](https://sourmash.readthedocs.io/) and [YACHT](https://github.com/KoslickiLab/YACHT) for k-mer-based analysis of genomic and metagenomic data. It is designed for a one-hour session but includes additional material for self-directed exploration.
 
-- [Sourmash tutorial](Sourmash.md): sketching, comparing, and searching genomic signatures
-- [YACHT tutorial](YACHT.md): hypothesis-testing-based taxonomic profiling of metagenomic samples
+The two tutorials share a single dataset and tell one story. We start with a metagenomic sample and a handful of candidate reference genomes, and we work our way from raw sequence to a statistically supported answer to the question *which of these genomes are actually in my sample?*
+
+- [Sourmash tutorial](Sourmash.md): what a sketch is, how to build and compare sketches, and why ANI is a better similarity measure than raw containment.
+- [YACHT tutorial](YACHT.md): turning those same sketches into a hypothesis test for genome presence/absence, and how that differs from taxonomic profiling.
 
 ---
 
@@ -24,59 +26,30 @@ conda activate ISMBtutorial
 
 `yacht` depends on `sourmash`, so this single environment covers both tutorials.
 
----
+### 2. Create a working directory and download the data
 
-### 2. Download tutorial data
-
-Create a directory where you would like this work to take place and navigate into it. For example:
+Everything below runs from one working directory. Create it, download the demo dataset into it, and make a folder to hold the sketches we will build:
 
 ```bash
 mkdir ISMBtutorial && cd ISMBtutorial
-```
-
-Then create the required subdirectories:
-
-```bash
-mkdir -p sourmash/{data,output,scripts} yacht
-```
-
-#### Sourmash tutorial data
-
-From inside `ISMBtutorial/`:
-
-```bash
-cd sourmash/data
-
-# Sample genomes for comparison exercises
-wget https://raw.githubusercontent.com/Penn-State-Microbiome-Center/KickStart-Workshop-2024/main/Day3-Shotgun/Data/sample_001.fna
-wget https://raw.githubusercontent.com/Penn-State-Microbiome-Center/KickStart-Workshop-2024/main/Day3-Shotgun/Data/sample_002.fna
-
-# Metagenomic samples for the MetaGenomQuest section
-wget -i https://raw.githubusercontent.com/Penn-State-Microbiome-Center/KickStart-Workshop-2022/main/Day5-Shotgun/Data/file_list.txt
-ls *.gz | xargs -P6 -I{} gunzip {}
-
-# E. coli reference and reads for the database search section
-curl -L https://osf.io/ruanf/download -o ecoliMG1655.fa.gz
-curl -L https://osf.io/q472x/download -o ecoli_ref-5m.fastq.gz
-
-# Collection of 50 E. coli signatures for database construction
-mkdir ecoli_many_sigs && cd ecoli_many_sigs
-curl -O -L https://github.com/sourmash-bio/sourmash/raw/latest/data/eschericia-sigs.tar.gz
-tar xzf eschericia-sigs.tar.gz && rm eschericia-sigs.tar.gz
-cd ../../..
-```
-
-#### YACHT tutorial data
-
-From inside `ISMBtutorial/`:
-
-```bash
-cd yacht
-
-# Demo dataset for the YACHT tutorial walkthrough
 yacht download demo --outfolder ./demo
-cd ..
+mkdir sketches
 ```
+
+This gives you:
+
+```
+ISMBtutorial/
+|-- demo/
+|   |-- query_data/query_data.fq      # a metagenomic sample (reads)
+|   |-- ref_genomes/                   # 15 candidate reference genomes (GTDB)
+|   |-- toy_genome_to_taxid.tsv        # maps each genome to a taxonomy ID
+|-- sketches/                          # (empty; we will fill this in)
+```
+
+The `demo` dataset is small and self-contained. The `query_data.fq` sample was simulated from 5 of the reference genomes at 0.5x coverage, so we have a known ground truth to check our answers against. The 15 reference genomes are randomly selected GTDB representatives.
+
+All commands in both tutorials assume you are in the top-level `ISMBtutorial/` directory.
 
 ---
 
@@ -86,3 +59,19 @@ Work through the tutorials in order:
 
 1. [Sourmash tutorial](Sourmash.md)
 2. [YACHT tutorial](YACHT.md)
+
+---
+
+## Optional: extra data for self-study
+
+The classic sourmash tutorials use an *E. coli* dataset (reads, an assembled genome, and a collection of 50 strain signatures) and a pair of small synthetic genomes. These are not needed for this workshop, but if you want to work through the upstream [sourmash tutorial](https://sourmash.readthedocs.io/en/latest/tutorial-basic.html) on your own afterwards, you can grab them with:
+
+```bash
+# (optional, self-study only) run from inside ISMBtutorial/
+mkdir -p extras && cd extras
+curl -L https://osf.io/ruanf/download -o ecoliMG1655.fa.gz
+curl -L https://osf.io/q472x/download -o ecoli_ref-5m.fastq.gz
+curl -O -L https://github.com/sourmash-bio/sourmash/raw/latest/data/eschericia-sigs.tar.gz
+tar xzf eschericia-sigs.tar.gz && rm eschericia-sigs.tar.gz
+cd ..
+```
